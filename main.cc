@@ -53,13 +53,13 @@ int main(int argc, char** argv) {
             std::getline(std::cin, keuze);
         }
         
-        
         if (keuze.substr(0, 4) == "exp ") {
             std::string formule = keuze.substr(4);
             exp.CallExpr(formule);
 
         } else if (keuze.substr(0, 4) == "dot ") {
             std::string uitvoer = keuze.substr(4);
+            exp.printDOT(uitvoer);
 
         } else if (keuze.substr(0, 4) == "mat ") {
             std::string uitvoer = keuze.substr(4);

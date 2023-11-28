@@ -1,128 +1,3 @@
-// #include <iostream>
-// #include "hulpfuncties.h"
-
-// bool isLetter(char letter){
-//     if(letter >= 'a' || letter <= 'z'){
-//         return true;
-//     }
-
-//     return false;
-// }
-
-// void parse::printAutomaat(Automaat eind){
-
-//     for(const auto& array : eind){
-//         for (int i = 0; i < lengteExpressie; i++) {
-//             std::cout << array[i] << " ";
-//         }
-//         std::cout << std::endl;
-//     }
-    
-// }
-
-// void parse::CallExpr(std::string formule){
-//     expressie = formule;
-//     // expressie = "c(a|bb)*c";
-//     lengteExpressie = expressie.size();
-//     huidigpos = 0;
-//     huidigeLetter = expressie[0]; 
-//     Aut = Expr();
-//     printAutomaat(Aut);
-
-// }
-
-// Automaat parse::Union(Automaat een, Automaat twee){
-//     Automaat drie;
-
-//     // drie.insert(een.end(), twee.begin(), twee.end());
-
-//     return een;
-
-// }
-
-// Automaat parse::Expr(){
-//     // Automaat Aut;
-//     Automaat Aut1 = Term();
-    
-//     if (huidigeLetter == '|' ){ 
-//         huidigpos++;
-//         huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         Automaat Aut2 = Expr(); // recursie!
-//         Aut1 = Union(Aut1, Aut2);
-//     }
-
-//     return Aut1;// plus van Aut1 en Aut2;
-// } // Expr
-
-// Automaat parse::Concat(Automaat een, Automaat twee){
-//     Automaat drie;
-
-//     // drie.insert(een.end(), twee.begin(), twee.end());
-
-//     return een;
-
-// }
-
-// Automaat parse::Term(){
-//     Automaat Aut1 = Fact(); // 1 a 2 // 3 b 4 // 5 b 6
-    
-//     if (huidigeLetter == '(' || isLetter(huidigeLetter)){
-//         Automaat Aut2 = Term(); // recursie!
-//         Aut1 = Concat(Aut1, Aut2);
-//     }
-
-    
-    
-//     return Aut1; // concatenatie van Aut1 en Aut2;
-// } // Term
-
-// Automaat parse::Star(Automaat een){
-//     // begin state is final state
-//     // of 
-
-//     return een;
-
-// }
-
-
-// Automaat parse::Fact(){
-//     Automaat Aut1;
-
-//     if (huidigeLetter == '('){ 
-//         huidigpos++;
-//         huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         Aut1 = Expr();
-
-//         if (huidigeLetter == ')'){
-//             huidigpos++;
-//             huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         } else{
-//             // error;
-//         }
-//     } else if(isLetter(huidigeLetter)){  // letter opslaan 
-//         std::cout << "hallo" << std::endl;
-//         Aut1.push_back({state, huidigeLetter, state+1, 0}); //tak met huidigeLetter;
-//         state += 2;
-//         huidigpos++;
-//         if(huidigpos != lengteExpressie-1){
-//             huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         }
-//     } else{
-//         throw std::runtime_error("Value is in valid");
-//     }
-
-//     if (huidigeLetter == '*'){ // eventueel while?
-//         Aut1 = Star(Aut1);
-//         huidigpos++;
-//         huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         if(huidigpos != lengteExpressie-1){
-//             huidigeLetter = expressie[huidigpos]; // lees volgende letter
-//         }
-//     }
-    
-//     return Aut1;
-// } // Fact
-
 #include <iostream>
 #include "hulpfuncties.h"
 
@@ -135,76 +10,115 @@ bool isLetter(char letter){
 }
 
 void parse::CallExpr(std::string formule){
+    state = 1;
+    Aut.clear();
     expressie = formule;
     lengteExpressie = expressie.size();
     huidigpos = 0;
+    huidigeLetter = expressie[huidigpos];
+
     
+    Aut = Expr();
 
-
-    Automaat result = Expr();
-
-
-
-    printAutomaat(result);
-
+    printAutomaat(Aut);
 
 }
 
-void parse::printAutomaat(const Automaat& automaat) const {
+// Custom function to swap two vectors
+void swapVectors(std::vector<int>& a, std::vector<int>& b) {
+    std::vector<int> temp = std::move(a);
+    a = std::move(b);
+    b = std::move(temp);
+}
+
+// Custom sorting function to sort Automaat based on the first element of each vector
+void sortAutomaat(Automaat& automaat) {
+    for (size_t i = 0; i < automaat.size(); ++i) {
+        for (size_t j = i + 1; j < automaat.size(); ++j) {
+            if (automaat[j][0] < automaat[i][0]) {
+                swapVectors(automaat[i], automaat[j]);
+            }
+        }
+    }
+}
+void parse::printAutomaat(Automaat& automaat) const {
+    sortAutomaat(automaat);
+
     std::cout << "From State\tSymbol\tTo State 1\tTo State 2" << std::endl;
     for (const auto& transition : automaat) {
-        std::cout << transition[0] << "\t\t"
-                  << transition[1] << "\t\t"
-                  << transition[2] << "\t\t"
+        std::cout << transition[0] << "\t\t";
+
+        char character = static_cast<char>(transition[1]);
+                
+        std::cout << character << "\t\t";
+        std::cout << transition[2] << "\t\t"
                   << transition[3] << std::endl;
     }
     std::cout << std::endl;
 }
 
 Automaat parse::Union(Automaat een, Automaat twee){
-    std::cout<<"komt in UNION"<< std::endl;
-
-    int startState = state++;
-    int acceptState = state++;
-
-    een.push_back({startState, '$', een.front()[0], twee.front()[0]}); // connect new startState to startState of een
-    twee.push_back({startState, '$', twee.front()[0], 0}); // connect new startState to startState of twee
-
-    een.push_back({een.back()[2], '$', acceptState, 0}); // connect new acceptingState to acceptingState of een
-    twee.push_back({twee.back()[2], '$', acceptState, 0}); // connect new acceptingState to acceptingState of twee
+    
+    state++;
+    int startState = state;
+    state++;
+    int acceptState = state;
 
     Automaat result = een;
 
-    for (const auto& transition : twee){
+    for (const auto& transition : twee) {
         result.push_back(transition);
     }
+    result.insert(result.begin(), {startState, '$', een.front()[0], twee.front()[0]});
+    // result.push_back({startState, '$', een.front()[0], twee.front()[0]}); // connect new startState to startState of een and twee
 
-return result;
+    result.push_back({een.back()[2], '$', acceptState, 0});
+
+    result.push_back({twee.back()[2], '$', acceptState, 0});
+
+    
+    
+    return result;
 
 }
 
 Automaat parse::Expr(){
-    std::cout<<"komt in EXPR"<< std::endl;
     // Automaat Aut;
     Automaat Aut1 = Term();
     
     if (huidigeLetter == '|' ){ 
-        huidigpos++;
-        huidigeLetter = expressie[huidigpos]; // lees volgende letter
-        Automaat Aut2 = Expr(); // recursie!
-
-        Aut1 = Union(Aut1, Aut2);
+        
+        if (huidigpos < lengteExpressie){
+            huidigpos++;
+            huidigeLetter = expressie[huidigpos]; // lees volgende letter
+            state++;
+            Automaat Aut2 = Expr(); // recursie!
+            Aut1 = Union(Aut1, Aut2);
+        }
+    
+    }else {
+        // Handle the case where '|' is at the end of the expression
+        // throw std::runtime_error("Expected expression after '|'");
+        return Aut1;
     }
-
 
     return Aut1;// union van Aut1 en Aut2;
 } // Expr
 
 Automaat parse::Concat(Automaat een, Automaat twee){
-    std::cout<<"komt in CONCAT"<< std::endl;
-    een.push_back({een.back()[2], '$', twee.front()[0], 0}); // connect acceptingState of een to startState of twee
-
+    // printAutomaat(een);
+    // printAutomaat(twee);
     Automaat result = een;
+    Automaat temp;
+    // temp.push_back({een.back()[2], '$', twee.front()[0], 0});
+    // printAutomaat(temp);
+
+    if(een.back()[3] != 0){
+        result.push_back({een.back()[3], '$', twee.front()[0], 0});
+    } else{
+        result.push_back({een.back()[2], '$', twee.front()[0], 0}); // connect acceptingState of een to startState of twee
+
+    }
 
     for (const auto& transition : twee){
         result.push_back(transition);
@@ -217,12 +131,18 @@ Automaat parse::Concat(Automaat een, Automaat twee){
 }
 
 Automaat parse::Term(){
-    std::cout<<"komt in TERM"<< std::endl;
     Automaat Aut1 = Fact(); // bijv letter
+    huidigeLetter = expressie[huidigpos];
     
     if (huidigeLetter == '(' || isLetter(huidigeLetter)){
+        
+        state++;
         Automaat Aut2 = Term(); // recursie!
         Aut1 = Concat(Aut1, Aut2);
+
+    }else{
+        // throw std::runtime_error("Expected a letter after or a '('");
+
     }
 
     
@@ -231,54 +151,109 @@ Automaat parse::Term(){
 } // Term
 
 Automaat parse::Star(Automaat een){
-    std::cout<<"komt in STAR"<< std::endl;
-    int startState = state++;
-    int acceptState = state++;
+    Automaat result = een;
+    state++;
+    int startState = state;
+    state++;
+    int acceptState = state;
 
-    een.push_back({startState, '$', een.front()[0], 0}); // startState to startState of een
+    result.push_back({een.back()[2], '$', een.front()[0], acceptState});
 
-    een.push_back({een.back()[2], '$', een.front()[0], 0}); // acceptState of een to startState of een
-    een.push_back({startState, '$', acceptState, 0}); // startState to finalstate
+    result.insert(result.begin(),{startState, '$', een.front()[0], acceptState}); // acceptState of een to startState of een
+    // result.push_back({startState, '$', een.front()[0], acceptState}); // startState to startState of een and acceptstate
 
 
-
-    return een;
-
+    // printAutomaat(result);
+    return result;
 }
 
 
 Automaat parse::Fact(){
-    std::cout<<"komt in FACT"<< std::endl;
     Automaat Aut1;
 
     if (huidigeLetter == '('){ 
         huidigpos++;
         huidigeLetter = expressie[huidigpos]; // lees volgende letter
-        std::cout<<expressie[huidigpos] << std::endl;
+
         Aut1 = Expr();
 
         if (huidigeLetter == ')'){
+            if (huidigpos < lengteExpressie){
             huidigpos++;
             huidigeLetter = expressie[huidigpos]; // lees volgende letter
+            } else{
+            huidigeLetter = '$';
+            }
         } else{
             // error;
         }
     } else if(isLetter(huidigeLetter)){  // letter opslaan 
-        std::cout<< huidigpos << std::endl;
-        std::cout<<expressie[huidigpos] << std::endl;
+
         Aut1.push_back({state, huidigeLetter, state+1, 0}); //tak met huidigeLetter;
         state++;
-        huidigpos++;
-        huidigeLetter = expressie[huidigpos]; // lees volgende letter
+
+        if (huidigpos < lengteExpressie ){
+            huidigpos++;
+            huidigeLetter = expressie[huidigpos]; // lees volgende letter
+        } else{
+            huidigeLetter = '$';
+        }
+
     } else{
         // throw std::runtime_error("Ingevoerde expressie is onjuist!");
     }
 
+
     if (huidigeLetter == '*'){ // eventueel while?
         Aut1 = Star(Aut1);
-        huidigpos++;
-        huidigeLetter = expressie[huidigpos]; // lees volgende letter
+        if (huidigpos < lengteExpressie ){
+            huidigpos++;
+            huidigeLetter = expressie[huidigpos]; // lees volgende letter
+        } else{
+            huidigeLetter = '$';
+        }
     }
     
     return Aut1;
 } // Fact
+
+void parse::printDOT(const std::string& uitvoerNaam){
+    std::ofstream dotFile(uitvoerNaam);
+
+    if(!dotFile){
+        std::cerr << "Kan niet wegschrijven!" << std::endl;
+        return;
+    }
+
+    if(!Aut.empty()){
+        printHelpDOT(Aut, dotFile);
+        dotFile.close();
+    } else{
+        std::cout << "Er is geen esxpressie" << std::endl;
+
+    }
+
+
+}
+
+void parse::printHelpDOT(Automaat transitions, std::ofstream& dotFile){
+    dotFile << "digraph StateMachine {" << std::endl;
+
+    for (const auto& transition : transitions) {
+        char character = static_cast<char>(transition[1]);
+        if(character == '$'){
+            character = ' ';
+        }
+        dotFile << "  \"" << transition[0] << "\" -> \"" << transition[2] << "\"";
+        if (transition[3] != 0) {
+            dotFile << " [label=\"" <<  character << "\"]" << std::endl;
+            dotFile << "  \"" << transition[0] << "\" -> \"" << transition[3] << "\" [label=\"" << character << "\"]" << std::endl;
+        } else {
+            dotFile << " [label=\"" <<  character << "\"]" << std::endl;
+        }
+    }
+
+    dotFile << "}" << std::endl;
+
+    dotFile.close();
+}
