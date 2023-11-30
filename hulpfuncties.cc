@@ -44,6 +44,7 @@ void sortAutomaat(Automaat& automaat) {
 }
 void parse::printAutomaat(Automaat& automaat) const {
     sortAutomaat(automaat);
+    automaat.push_back({state, '$', 0, 0});
 
     std::cout << "From State\tSymbol\tTo State 1\tTo State 2" << std::endl;
     for (const auto& transition : automaat) {
@@ -56,6 +57,8 @@ void parse::printAutomaat(Automaat& automaat) const {
                   << transition[3] << std::endl;
     }
     std::cout << std::endl;
+
+
 }
 
 Automaat parse::Union(Automaat een, Automaat twee){
@@ -223,7 +226,7 @@ Automaat parse::Fact(){
         }
     }
 
-    Aut1.push_back({state, '$', 0, 0});
+    // Aut1.push_back({state, '$', 0, 0});
     
     return Aut1;
 } // Fact
@@ -279,31 +282,47 @@ bool parse::calcMatch(std::string match){
     int currentState = beginState; // Start state of the automaton
     size_t index = 0; // Index to iterate through the input string
 
-    currentSymbol = match[index];
+    currentSymbol = match[0];
 
-    // checken of de currentstate final state is 
-    std::cout << "currentState: " << currentState << std::endl;
-    if(currentState == Aut.back()[0]){
-        return true;
-    } 
 
-    while (index < match.size()) {
+    while (index <= match.size()) {
+
 
         bool transitionFound = false;
 
    
 
-        for (const auto& transition : Aut) { // check of er een geldige transistion is  
+        for (const auto& transition : Aut) { // check of er een geldige transistion is 
+            std::cout << "currentState: " << currentState << std::endl;
+            std::cout << "currentSymbol: " << currentSymbol << std::endl;
+
+        std::cout << "Debug: Checking transition: " << transition[0] << " -> " << transition[2] << " with symbol '" << transition[1] << "'" << std::endl; 
 
             if (transition[0] == currentState && (transition[1] == currentSymbol || transition[1] == '$')) {
+                
+                if (transition[2]!= 0){
+                    currentState = transition[2]; // Move to the next state
 
-                currentState = transition[2]; // Move to the next state
-                for (const auto& nextTransition : Aut) {
-                    if (nextTransition[0] == currentState) {
-                        currentSymbol = nextTransition[1];
-                        break; // Once found, exit the loop
-                    }
                 }
+                if (transition[3] != 0){
+                    currentState = transition[3];
+                }
+
+                currentSymbol = (transition[1] == '$') ? currentSymbol : match[index];
+                // for (const auto& nextTransition : Aut) {
+                //     if (nextTransition[0] == currentState) {
+                //         std::cout << "Debug: Transition found from " << currentState << " to " << nextTransition[2] << " with symbol '" << nextTransition[1] << "'" << std::endl;
+                //         std::cout << "Debug: Current state: " << currentState << ", Current symbol: " << currentSymbol << std::endl;
+
+                //         if (nextTransition[3] != 0) {
+                //             std::cout << "Debug: Transition found from " << transition[0] << " to " << transition[3] << " with symbol '$'" << std::endl;
+                //             std::cout << "Debug: Current state: " << currentState << ", Current symbol: " << currentSymbol << std::endl;
+                //         }
+
+                //         // currentSymbol = nextTransition[1];
+                //         break; // Once found, exit the loop
+                //     }
+                // }
 
                 transitionFound = true;
                 break;
@@ -321,6 +340,9 @@ bool parse::calcMatch(std::string match){
 
     // checken of de currentstate final state is 
     std::cout << "currentState: " << currentState << std::endl;
+    std::cout << "currentSymbol: " << currentSymbol << std::endl;
+
+    std::cout << "Final state: " << Aut.back()[0] << std::endl;
     if(currentState == Aut.back()[0]){
         return true;
     } 
