@@ -16,6 +16,7 @@ void parse::CallExpr(std::string formule){
     lengteExpressie = expressie.size();
     huidigpos = 0;
     huidigeLetter = expressie[huidigpos];
+    beginState = 1;
 
     
     Aut = Expr();
@@ -61,8 +62,12 @@ Automaat parse::Union(Automaat een, Automaat twee){
     
     state++;
     int startState = state;
+    if (beginState > startState){
+        beginState = startState;
+    }
     state++;
     int acceptState = state;
+
 
     Automaat result = een;
 
@@ -154,6 +159,9 @@ Automaat parse::Star(Automaat een){
     Automaat result = een;
     state++;
     int startState = state;
+
+        beginState = startState;
+    
     state++;
     int acceptState = state;
 
@@ -161,6 +169,7 @@ Automaat parse::Star(Automaat een){
 
     result.insert(result.begin(),{startState, '$', een.front()[0], acceptState}); // acceptState of een to startState of een
     // result.push_back({startState, '$', een.front()[0], acceptState}); // startState to startState of een and acceptstate
+
 
 
     // printAutomaat(result);
@@ -213,6 +222,8 @@ Automaat parse::Fact(){
             huidigeLetter = '$';
         }
     }
+
+    Aut1.push_back({state, '$', 0, 0});
     
     return Aut1;
 } // Fact
@@ -229,7 +240,7 @@ void parse::printDOT(const std::string& uitvoerNaam){
         printHelpDOT(Aut, dotFile);
         dotFile.close();
     } else{
-        std::cout << "Er is geen esxpressie" << std::endl;
+        std::cerr << "Er is geen esxpressie" << std::endl;
 
     }
 
@@ -256,4 +267,75 @@ void parse::printHelpDOT(Automaat transitions, std::ofstream& dotFile){
     dotFile << "}" << std::endl;
 
     dotFile.close();
+}
+
+bool parse::calcMatch(std::string match){
+    if(Aut.empty()){
+        std::cerr << "Geen expressie ingevoerd." << std::endl;
+        return false;
+    }
+
+    std::cout<< "beginstate:" << beginState << std::endl;
+    int currentState = beginState; // Start state of the automaton
+    size_t index = 0; // Index to iterate through the input string
+
+    currentSymbol = match[index];
+
+    // checken of de currentstate final state is 
+    std::cout << "currentState: " << currentState << std::endl;
+    if(currentState == Aut.back()[0]){
+        return true;
+    } 
+
+    while (index < match.size()) {
+
+        bool transitionFound = false;
+
+   
+
+        for (const auto& transition : Aut) { // check of er een geldige transistion is  
+
+            if (transition[0] == currentState && (transition[1] == currentSymbol || transition[1] == '$')) {
+
+                currentState = transition[2]; // Move to the next state
+                for (const auto& nextTransition : Aut) {
+                    if (nextTransition[0] == currentState) {
+                        currentSymbol = nextTransition[1];
+                        break; // Once found, exit the loop
+                    }
+                }
+
+                transitionFound = true;
+                break;
+            }
+    
+        }
+
+        if (!transitionFound) {
+            std::cerr << "No valid transition for symbol '" << currentSymbol << "' at state " << currentState << std::endl;
+            return false;
+        }
+
+        index++;
+    }
+
+    // checken of de currentstate final state is 
+    std::cout << "currentState: " << currentState << std::endl;
+    if(currentState == Aut.back()[0]){
+        return true;
+    } 
+     
+
+    return false;
+
+}
+
+
+void parse::callMatch(std::string match){
+    if (calcMatch(match)){
+        std::cout << "match" << std::endl;
+    }else{
+        std::cout << "geen match" << std::endl;
+    }
+
 }

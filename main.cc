@@ -63,7 +63,9 @@ int main(int argc, char** argv) {
 
         } else if (keuze.substr(0, 4) == "mat ") {
             std::string uitvoer = keuze.substr(4);
-            std::cout<< "dit is deel 2" << std::endl;
+            exp.callMatch(uitvoer);
+            
+
         } else if (keuze == "end") {
             menu = false;
         } else {

@@ -23,13 +23,17 @@ class parse{
         void printAutomaat(Automaat& automaat) const;
         void printDOT(const std::string& uitvoerNaam);
         void printHelpDOT(Automaat, std::ofstream&);
+        void callMatch(std::string match);
+        bool calcMatch(std::string match);
+        bool calcMatchRecursive(int currentState, size_t index, const std::string& match);
 
     private:
         std::string expressie;
         char huidigeLetter;
-        int lengteExpressie, huidigpos, state;
+        int lengteExpressie, huidigpos, state, beginState;
         Automaat Aut;
         std::vector<std::pair<char, int[2]>> Automaton;
+        char currentSymbol;
 
 
 
