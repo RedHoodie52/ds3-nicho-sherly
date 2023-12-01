@@ -278,71 +278,111 @@ bool parse::calcMatch(std::string match){
         return false;
     }
 
-    std::cout<< "beginstate:" << beginState << std::endl;
     int currentState = beginState; // Start state of the automaton
     size_t index = 0; // Index to iterate through the input string
 
-    currentSymbol = match[0];
+    currentSymbol = match[index]; // eerste symbool checken 
 
+    std::cout << "currentState: " << currentState << std::endl;
+    std::cout << "currentSymbol: " << currentSymbol << std::endl;
 
-    while (index <= match.size()) {
-
+    int vorige;
+    while (index < match.size()) {
+        currentSymbol = match[index];
+        std::cout<< "index: " << index << std::endl;
 
         bool transitionFound = false;
 
-   
-
         for (const auto& transition : Aut) { // check of er een geldige transistion is 
+
+            std::cout << "checken van transition " << transition[0] << std::endl;
             std::cout << "currentState: " << currentState << std::endl;
             std::cout << "currentSymbol: " << currentSymbol << std::endl;
 
-        std::cout << "Debug: Checking transition: " << transition[0] << " -> " << transition[2] << " with symbol '" << transition[1] << "'" << std::endl; 
+            if (transition[0] == currentState && transition[1] == '$') {
+                std::cout << "ik kom hierin" << std::endl;
+                if (transition[2] != 0) {
+                    currentState = transition[2]; // Move to the next state
+                    std::cout << "Debug: Epsilon transition from " << transition[0] << " to " << currentState << std::endl;
+                    vorige = transition[0];
+                    std::cout<<"true1" <<std::endl;
+                    transitionFound = true;
+                }
+                break;
+            }
 
             if (transition[0] == currentState && (transition[1] == currentSymbol || transition[1] == '$')) {
                 
                 if (transition[2]!= 0){
                     currentState = transition[2]; // Move to the next state
+                    
+                    std::cout<<"true2" <<std::endl;
+                    transitionFound = true;
 
+                    std::cout << "transition gevonden: " << transition[0] << std::endl;
+                    std::cout << "currentState geworden: " << currentState << std::endl;
+                    std::cout << "currentSymbol geworden: " << currentSymbol << std::endl;
+                }
+                break;
+            }
+
+            if (transition[0] == currentState && transition[3] != 0 && !transitionFound){
+                currentState = transition[3];
+                std::cout << "Debug: Epsilon transition from " << transition[0] << " to " << currentState << std::endl;
+                std::cout<<"true3" <<std::endl;
+                transitionFound = true;
+            }
+    
+        }
+        for (const auto& transition : Aut){ // laatste check
+            if (currentState == transition[0] && currentSymbol == transition[1]){
+                if (transition[2] != 0) {
+                    currentState = transition[2]; // Move to the next state
                 }
                 if (transition[3] != 0){
                     currentState = transition[3];
                 }
-
-                currentSymbol = (transition[1] == '$') ? currentSymbol : match[index];
-                // for (const auto& nextTransition : Aut) {
-                //     if (nextTransition[0] == currentState) {
-                //         std::cout << "Debug: Transition found from " << currentState << " to " << nextTransition[2] << " with symbol '" << nextTransition[1] << "'" << std::endl;
-                //         std::cout << "Debug: Current state: " << currentState << ", Current symbol: " << currentSymbol << std::endl;
-
-                //         if (nextTransition[3] != 0) {
-                //             std::cout << "Debug: Transition found from " << transition[0] << " to " << transition[3] << " with symbol '$'" << std::endl;
-                //             std::cout << "Debug: Current state: " << currentState << ", Current symbol: " << currentSymbol << std::endl;
-                //         }
-
-                //         // currentSymbol = nextTransition[1];
-                //         break; // Once found, exit the loop
-                //     }
-                // }
-
-                transitionFound = true;
-                break;
             }
-    
+
+
         }
 
+
+
         if (!transitionFound) {
-            std::cerr << "No valid transition for symbol '" << currentSymbol << "' at state " << currentState << std::endl;
             return false;
         }
 
         index++;
+
+        if(!(currentState == Aut.back()[0])){ // 2e to state proberen
+            std::cout << "alles kan kapot" << std::endl;
+            currentState = vorige; 
+            for (const auto& transition : Aut){ // laatste check
+                if (transition[0] == currentState && transition[1] == '$'){
+                    
+                    if (transition[3] != 0){
+                        currentState = transition[3];
+                    }
+                }
+            }
+
+
+
+        }
+            
+        
     }
+
+
 
     // checken of de currentstate final state is 
     std::cout << "currentState: " << currentState << std::endl;
     std::cout << "currentSymbol: " << currentSymbol << std::endl;
 
     std::cout << "Final state: " << Aut.back()[0] << std::endl;
+    
+
     if(currentState == Aut.back()[0]){
         return true;
     } 

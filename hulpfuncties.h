@@ -25,7 +25,7 @@ class parse{
         void printHelpDOT(Automaat, std::ofstream&);
         void callMatch(std::string match);
         bool calcMatch(std::string match);
-        bool calcMatchRecursive(int currentState, size_t index, const std::string& match);
+
 
     private:
         std::string expressie;
