@@ -25,14 +25,14 @@ void parse::CallExpr(std::string formule){
 
 }
 
-// Custom function to swap two vectors
+// hulp functie voor wisselen van vectors
 void swapVectors(std::vector<int>& a, std::vector<int>& b) {
     std::vector<int> temp = std::move(a);
     a = std::move(b);
     b = std::move(temp);
 }
 
-// Custom sorting function to sort Automaat based on the first element of each vector
+// sorteert automaat op "from state"
 void sortAutomaat(Automaat& automaat) {
     for (size_t i = 0; i < automaat.size(); ++i) {
         for (size_t j = i + 1; j < automaat.size(); ++j) {
@@ -42,6 +42,8 @@ void sortAutomaat(Automaat& automaat) {
         }
     }
 }
+
+// print de automaat
 void parse::printAutomaat(Automaat& automaat) const {
     sortAutomaat(automaat);
     automaat.push_back({state, '$', 0, 0});
@@ -62,36 +64,29 @@ void parse::printAutomaat(Automaat& automaat) const {
 }
 
 Automaat parse::Union(Automaat een, Automaat twee){
-    
     state++;
-    int startState = state;
-    if (beginState > startState){
-        beginState = startState;
-    }
-    state++;
-    int acceptState = state;
+    int startState = state; // nieuwe ingangspunt
 
+    state++;
+    int acceptState = state; // nieuwe uitgangspunt
+
+    beginState = startState; // ingangspunt opslaan voor matchen
 
     Automaat result = een;
-
     for (const auto& transition : twee) {
         result.push_back(transition);
     }
-    result.insert(result.begin(), {startState, '$', een.front()[0], twee.front()[0]});
-    // result.push_back({startState, '$', een.front()[0], twee.front()[0]}); // connect new startState to startState of een and twee
-
+    //ingangspunt naar ingangspunt van "een" en "twee"
+    result.insert(result.begin(), {startState, '$', een.front()[0], twee.front()[0]}); 
+    // uitgangspunt "een" naar uitgangspunt
     result.push_back({een.back()[2], '$', acceptState, 0});
-
+    // uitgangspunt "twee" naar uitgangspunt
     result.push_back({twee.back()[2], '$', acceptState, 0});
 
-    
-    
     return result;
-
 }
 
 Automaat parse::Expr(){
-    // Automaat Aut;
     Automaat Aut1 = Term();
     
     if (huidigeLetter == '|' ){ 
@@ -105,8 +100,7 @@ Automaat parse::Expr(){
         }
     
     }else {
-        // Handle the case where '|' is at the end of the expression
-        // throw std::runtime_error("Expected expression after '|'");
+        // throw std::runtime_error("Ingevoerde expressie is onjuist!");
         return Aut1;
     }
 
@@ -114,17 +108,13 @@ Automaat parse::Expr(){
 } // Expr
 
 Automaat parse::Concat(Automaat een, Automaat twee){
-    // printAutomaat(een);
-    // printAutomaat(twee);
     Automaat result = een;
     Automaat temp;
-    // temp.push_back({een.back()[2], '$', twee.front()[0], 0});
-    // printAutomaat(temp);
-
+    // verbind uitgang "een" met ingang "twee"
     if(een.back()[3] != 0){
         result.push_back({een.back()[3], '$', twee.front()[0], 0});
     } else{
-        result.push_back({een.back()[2], '$', twee.front()[0], 0}); // connect acceptingState of een to startState of twee
+        result.push_back({een.back()[2], '$', twee.front()[0], 0}); 
 
     }
 
@@ -133,9 +123,6 @@ Automaat parse::Concat(Automaat een, Automaat twee){
     }
 
     return result;
-
-    
-
 }
 
 Automaat parse::Term(){
@@ -149,7 +136,7 @@ Automaat parse::Term(){
         Aut1 = Concat(Aut1, Aut2);
 
     }else{
-        // throw std::runtime_error("Expected a letter after or a '('");
+        // throw std::runtime_error("Ingevoerde expressie is onjuist!");
 
     }
 
@@ -160,22 +147,20 @@ Automaat parse::Term(){
 
 Automaat parse::Star(Automaat een){
     Automaat result = een;
-    state++;
-    int startState = state;
 
-        beginState = startState;
+    state++;
+    int startState = state;// nieuwe inganspunt
+
+    state++;
+    int acceptState = state; // nieuwe uitgangspunt
+
+    beginState = startState; // ingangspunt oplsaan voor matchen
     
-    state++;
-    int acceptState = state;
-
+    // uitgang "een" verbinden met ingang "een"
     result.push_back({een.back()[2], '$', een.front()[0], acceptState});
+    // ingang verbinden met ingang "een" en uitgang
+    result.insert(result.begin(),{startState, '$', een.front()[0], acceptState}); 
 
-    result.insert(result.begin(),{startState, '$', een.front()[0], acceptState}); // acceptState of een to startState of een
-    // result.push_back({startState, '$', een.front()[0], acceptState}); // startState to startState of een and acceptstate
-
-
-
-    // printAutomaat(result);
     return result;
 }
 
@@ -191,13 +176,13 @@ Automaat parse::Fact(){
 
         if (huidigeLetter == ')'){
             if (huidigpos < lengteExpressie){
-            huidigpos++;
-            huidigeLetter = expressie[huidigpos]; // lees volgende letter
+                huidigpos++;
+                huidigeLetter = expressie[huidigpos]; // lees volgende letter
             } else{
-            huidigeLetter = '$';
+                huidigeLetter = '$';
             }
         } else{
-            // error;
+            // throw std::runtime_error("Ingevoerde expressie is onjuist!");
         }
     } else if(isLetter(huidigeLetter)){  // letter opslaan 
 
@@ -215,8 +200,7 @@ Automaat parse::Fact(){
         // throw std::runtime_error("Ingevoerde expressie is onjuist!");
     }
 
-
-    if (huidigeLetter == '*'){ // eventueel while?
+    if (huidigeLetter == '*'){ 
         Aut1 = Star(Aut1);
         if (huidigpos < lengteExpressie ){
             huidigpos++;
@@ -225,8 +209,6 @@ Automaat parse::Fact(){
             huidigeLetter = '$';
         }
     }
-
-    // Aut1.push_back({state, '$', 0, 0});
     
     return Aut1;
 } // Fact
@@ -252,13 +234,16 @@ void parse::printDOT(const std::string& uitvoerNaam){
 
 void parse::printHelpDOT(Automaat transitions, std::ofstream& dotFile){
     dotFile << "digraph StateMachine {" << std::endl;
+    dotFile << "  rankdir=\"LR\";" << std::endl;
 
     for (const auto& transition : transitions) {
         char character = static_cast<char>(transition[1]);
         if(character == '$'){
             character = ' ';
         }
-        dotFile << "  \"" << transition[0] << "\" -> \"" << transition[2] << "\"";
+        if(transition[2 != 0]){
+            dotFile << "  \"" << transition[0] << "\" -> \"" << transition[2] << "\"";
+        }
         if (transition[3] != 0) {
             dotFile << " [label=\"" <<  character << "\"]" << std::endl;
             dotFile << "  \"" << transition[0] << "\" -> \"" << transition[3] << "\" [label=\"" << character << "\"]" << std::endl;
@@ -272,129 +257,93 @@ void parse::printHelpDOT(Automaat transitions, std::ofstream& dotFile){
     dotFile.close();
 }
 
-bool parse::calcMatch(std::string match){
-    if(Aut.empty()){
-        std::cerr << "Geen expressie ingevoerd." << std::endl;
-        return false;
+bool contains(const std::vector<int>& vec, int value) {
+    for (int element : vec) {
+        if (element == value) {
+            return true;
+        }
     }
-
-    int currentState = beginState; // Start state of the automaton
-    size_t index = 0; // Index to iterate through the input string
-
-    currentSymbol = match[index]; // eerste symbool checken 
-
-    std::cout << "currentState: " << currentState << std::endl;
-    std::cout << "currentSymbol: " << currentSymbol << std::endl;
-
-    int vorige;
-    while (index < match.size()) {
-        currentSymbol = match[index];
-        std::cout<< "index: " << index << std::endl;
-
-        bool transitionFound = false;
-
-        for (const auto& transition : Aut) { // check of er een geldige transistion is 
-
-            std::cout << "checken van transition " << transition[0] << std::endl;
-            std::cout << "currentState: " << currentState << std::endl;
-            std::cout << "currentSymbol: " << currentSymbol << std::endl;
-
-            if (transition[0] == currentState && transition[1] == '$') {
-                std::cout << "ik kom hierin" << std::endl;
-                if (transition[2] != 0) {
-                    currentState = transition[2]; // Move to the next state
-                    std::cout << "Debug: Epsilon transition from " << transition[0] << " to " << currentState << std::endl;
-                    vorige = transition[0];
-                    std::cout<<"true1" <<std::endl;
-                    transitionFound = true;
-                }
-                break;
-            }
-
-            if (transition[0] == currentState && (transition[1] == currentSymbol || transition[1] == '$')) {
-                
-                if (transition[2]!= 0){
-                    currentState = transition[2]; // Move to the next state
-                    
-                    std::cout<<"true2" <<std::endl;
-                    transitionFound = true;
-
-                    std::cout << "transition gevonden: " << transition[0] << std::endl;
-                    std::cout << "currentState geworden: " << currentState << std::endl;
-                    std::cout << "currentSymbol geworden: " << currentSymbol << std::endl;
-                }
-                break;
-            }
-
-            if (transition[0] == currentState && transition[3] != 0 && !transitionFound){
-                currentState = transition[3];
-                std::cout << "Debug: Epsilon transition from " << transition[0] << " to " << currentState << std::endl;
-                std::cout<<"true3" <<std::endl;
-                transitionFound = true;
-            }
-    
-        }
-        for (const auto& transition : Aut){ // laatste check
-            if (currentState == transition[0] && currentSymbol == transition[1]){
-                if (transition[2] != 0) {
-                    currentState = transition[2]; // Move to the next state
-                }
-                if (transition[3] != 0){
-                    currentState = transition[3];
-                }
-            }
-
-
-        }
-
-
-
-        if (!transitionFound) {
-            return false;
-        }
-
-        index++;
-
-        if(!(currentState == Aut.back()[0])){ // 2e to state proberen
-            std::cout << "alles kan kapot" << std::endl;
-            currentState = vorige; 
-            for (const auto& transition : Aut){ // laatste check
-                if (transition[0] == currentState && transition[1] == '$'){
-                    
-                    if (transition[3] != 0){
-                        currentState = transition[3];
-                    }
-                }
-            }
-
-
-
-        }
-            
-        
-    }
-
-
-
-    // checken of de currentstate final state is 
-    std::cout << "currentState: " << currentState << std::endl;
-    std::cout << "currentSymbol: " << currentSymbol << std::endl;
-
-    std::cout << "Final state: " << Aut.back()[0] << std::endl;
-    
-
-    if(currentState == Aut.back()[0]){
-        return true;
-    } 
-     
-
     return false;
-
 }
 
 
+void parse::FindEpsilon(int path){
+    
+    if(path != 0){
+        if(!contains(passed, path)){
+            passed.push_back(path);
+            for(const auto automaat : Aut){
+                if(automaat[0] == path && automaat[1] == '$'){
+                    if(path == Aut.back()[0]){
+                        onthoudE.push_back(path);
+                    }
+                    FindEpsilon(int(automaat[2]));
+                    if(automaat[3] != '0'){
+                        FindEpsilon(int(automaat[3]));
+                    }
+                }else if(automaat[0] == path){
+                    onthoudE.push_back(path);
+                }
+            }
+        }
+    }
+}
+
+int parse::findSymbol(int path, char symbol){
+
+    for(const auto automaat : Aut){
+        if(automaat[0] == path && automaat[1] == symbol){
+            return automaat[2];
+        }
+    }
+    
+    return 0;
+}
+void bubbleSort(std::vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < n - i - 1; ++j) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap arr[j] and arr[j + 1]
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
 void parse::callMatch(std::string match){
-    if (calcMatch(match)){
+    
+    std::vector<int> onthoudS;
+    for(const auto automaat : Aut){
+        if(automaat[0] == beginState && automaat[1] == '$'){
+            passed.clear();
+            FindEpsilon(beginState);
+        }else{
+            onthoudS.push_back(beginState);
+
+        }
+    }
+
+    for(int index = 0; index < int(match.length()); index++){
+        for(const int i : onthoudE){
+            int a = findSymbol(i, match[index]);
+            if(a != 0 ){
+                onthoudS.push_back(a);
+            }
+        }
+        onthoudE.clear();
+        for(const int j : onthoudS){
+            passed.clear();
+            FindEpsilon(j);
+        }
+        onthoudS.clear();
+    }
+
+    bubbleSort(onthoudE);
+
+    if(onthoudE.back() == Aut.back()[0]){
         std::cout << "match" << std::endl;
     }else{
         std::cout << "geen match" << std::endl;

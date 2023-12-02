@@ -71,6 +71,9 @@
         "string_view": "cpp",
         "unordered_map": "cpp",
         "variant": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "xhash": "cpp"
     }
 }

@@ -23,8 +23,12 @@ class parse{
         void printAutomaat(Automaat& automaat) const;
         void printDOT(const std::string& uitvoerNaam);
         void printHelpDOT(Automaat, std::ofstream&);
+
         void callMatch(std::string match);
-        bool calcMatch(std::string match);
+        bool findSymbolMatch(char a, int state);
+        void FindEpsilon(int path);
+        int findSymbol(int path, char symbol);
+        
 
 
     private:
@@ -33,6 +37,7 @@ class parse{
         int lengteExpressie, huidigpos, state, beginState;
         Automaat Aut;
         std::vector<std::pair<char, int[2]>> Automaton;
+        std::vector<int> onthoudE, passed;
         char currentSymbol;
 
 
