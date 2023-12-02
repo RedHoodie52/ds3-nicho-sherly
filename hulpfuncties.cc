@@ -266,12 +266,11 @@ bool contains(const std::vector<int>& vec, int value) {
     return false;
 }
 
-
-void parse::FindEpsilon(int path){
+void parse::FindEpsilon(int path){ // zoekt epsilon-closure
     
     if(path != 0){
         if(!contains(passed, path)){
-            passed.push_back(path);
+            passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
             for(const auto automaat : Aut){
                 if(automaat[0] == path && automaat[1] == '$'){
                     if(path == Aut.back()[0]){
@@ -289,10 +288,10 @@ void parse::FindEpsilon(int path){
     }
 }
 
-int parse::findSymbol(int path, char symbol){
+int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matchende symbol is
 
     for(const auto automaat : Aut){
-        if(automaat[0] == path && automaat[1] == symbol){
+        if(automaat[0] == path && automaat[1] == symbol){ 
             return automaat[2];
         }
     }
@@ -304,7 +303,6 @@ void bubbleSort(std::vector<int>& arr) {
     for (int i = 0; i < n - 1; ++i) {
         for (int j = 0; j < n - i - 1; ++j) {
             if (arr[j] > arr[j + 1]) {
-                // Swap arr[j] and arr[j + 1]
                 int temp = arr[j];
                 arr[j] = arr[j + 1];
                 arr[j + 1] = temp;
@@ -319,14 +317,14 @@ void parse::callMatch(std::string match){
     for(const auto automaat : Aut){
         if(automaat[0] == beginState && automaat[1] == '$'){
             passed.clear();
-            FindEpsilon(beginState);
+            FindEpsilon(beginState); // als automaton begint met een lambda
         }else{
-            onthoudS.push_back(beginState);
+            onthoudS.push_back(beginState); // als automaton begint met een character
 
         }
     }
 
-    for(int index = 0; index < int(match.length()); index++){
+    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
         for(const int i : onthoudE){
             int a = findSymbol(i, match[index]);
             if(a != 0 ){
