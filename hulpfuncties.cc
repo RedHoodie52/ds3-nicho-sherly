@@ -71,6 +71,7 @@ Automaat parse::Union(Automaat een, Automaat twee){
     int acceptState = state; // nieuwe uitgangspunt
 
     beginState = startState; // ingangspunt opslaan voor matchen
+    std::cout << "Union - dit is begin state: " << beginState << std::endl;
 
     Automaat result = een;
     for (const auto& transition : twee) {
@@ -79,9 +80,18 @@ Automaat parse::Union(Automaat een, Automaat twee){
     //ingangspunt naar ingangspunt van "een" en "twee"
     result.insert(result.begin(), {startState, '$', een.front()[0], twee.front()[0]}); 
     // uitgangspunt "een" naar uitgangspunt
-    result.push_back({een.back()[2], '$', acceptState, 0});
+    if(een.back()[3] != 0){
+        result.push_back({een.back()[3], '$', acceptState, 0});
+    }else {
+        result.push_back({een.back()[2], '$', acceptState, 0});
+    }
+
     // uitgangspunt "twee" naar uitgangspunt
-    result.push_back({twee.back()[2], '$', acceptState, 0});
+    if(twee.back()[3] != 0){
+        result.push_back({twee.back()[3], '$', acceptState, 0});
+    }else {
+        result.push_back({twee.back()[2], '$', acceptState, 0});
+    }
 
     return result;
 }
@@ -110,6 +120,10 @@ Automaat parse::Expr(){
 Automaat parse::Concat(Automaat een, Automaat twee){
     Automaat result = een;
     Automaat temp;
+
+    beginState = een.front()[0]; // ingangspunt oplsaan voor matchen
+    std::cout << "Concat - dit is begin state: " << beginState << std::endl;
+
     // verbind uitgang "een" met ingang "twee"
     if(een.back()[3] != 0){
         result.push_back({een.back()[3], '$', twee.front()[0], 0});
@@ -155,6 +169,7 @@ Automaat parse::Star(Automaat een){
     int acceptState = state; // nieuwe uitgangspunt
 
     beginState = startState; // ingangspunt oplsaan voor matchen
+    std::cout << "Star - dit is begin state: " << beginState << std::endl;
     
     // uitgang "een" verbinden met ingang "een"
     result.push_back({een.back()[2], '$', een.front()[0], acceptState});
@@ -268,36 +283,47 @@ bool contains(const std::vector<int>& vec, int value) {
 
 void parse::FindEpsilon(int path){ // zoekt epsilon-closure
     
-    if(path != 0){
-        if(!contains(passed, path)){
-            passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
-            for(const auto automaat : Aut){
-                if(automaat[0] == path && automaat[1] == '$'){
-                    if(path == Aut.back()[0]){
-                        onthoudE.push_back(path);
-                    }
-                    FindEpsilon(int(automaat[2]));
-                    if(automaat[3] != '0'){
-                        FindEpsilon(int(automaat[3]));
-                    }
-                }else if(automaat[0] == path){
-                    onthoudE.push_back(path);
-                }
-            }
+    // if(path != 0){
+    //     if(!contains(passed, path)){
+    //         passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
+    //         for(const auto automaat : Aut){
+    //             if(automaat[0] == path && automaat[1] == '$'){
+    //                 if(path == Aut.back()[0]){
+    //                     onthoudE.push_back(path);
+    //                 }
+    //                 FindEpsilon(int(automaat[2]));
+    //                 if(automaat[3] != '0'){
+    //                     FindEpsilon(int(automaat[3]));
+    //                 }
+    //             }else if(automaat[0] == path){
+    //                 onthoudE.push_back(path);
+    //             }
+    //         }
+    //     }
+    // }
+
+    for(const auto automaat : Aut){
+        if(automaat[0] == path && automaat[1] == '$'){
+                if()
         }
     }
+
+
 }
 
 int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matchende symbol is
 
-    for(const auto automaat : Aut){
-        if(automaat[0] == path && automaat[1] == symbol){ 
-            return automaat[2];
-        }
-    }
+    // for(const auto automaat : Aut){
+    //     if(automaat[0] == path && automaat[1] == symbol){ 
+    //         return automaat[2];
+    //     }
+    // }
     
+
+
     return 0;
 }
+
 void bubbleSort(std::vector<int>& arr) {
     int n = arr.size();
     for (int i = 0; i < n - 1; ++i) {
@@ -313,38 +339,45 @@ void bubbleSort(std::vector<int>& arr) {
 
 void parse::callMatch(std::string match){
     
-    std::vector<int> onthoudS;
-    for(const auto automaat : Aut){
-        if(automaat[0] == beginState && automaat[1] == '$'){
-            passed.clear();
-            FindEpsilon(beginState); // als automaton begint met een lambda
-        }else{
-            onthoudS.push_back(beginState); // als automaton begint met een character
+    // std::vector<int> onthoudS;
+    // for(const auto automaat : Aut){
+    //     if(automaat[0] == beginState && automaat[1] == '$'){
+    //         passed.clear();
+    //         FindEpsilon(beginState); // als automaton begint met een lambda
+    //     }else{
+    //         onthoudS.push_back(beginState); // als automaton begint met een character
 
-        }
-    }
+    //     }
+    // }
 
-    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
-        for(const int i : onthoudE){
-            int a = findSymbol(i, match[index]);
-            if(a != 0 ){
-                onthoudS.push_back(a);
-            }
-        }
-        onthoudE.clear();
-        for(const int j : onthoudS){
-            passed.clear();
-            FindEpsilon(j);
-        }
-        onthoudS.clear();
-    }
+    // for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
+    //     for(const int i : onthoudE){
+    //         int a = findSymbol(i, match[index]);
+    //         if(a != 0 ){
+    //             onthoudS.push_back(a);
+    //         }
+    //     }
+    //     onthoudE.clear();
+    //     for(const int j : onthoudS){
+    //         passed.clear();
+    //         FindEpsilon(j);
+    //     }
+    //     onthoudS.clear();
+    // }
 
-    bubbleSort(onthoudE);
+    // bubbleSort(onthoudE);
 
-    if(onthoudE.back() == Aut.back()[0]){
-        std::cout << "match" << std::endl;
-    }else{
-        std::cout << "geen match" << std::endl;
-    }
+    // if(onthoudE.back() == Aut.back()[0]){
+    //     std::cout << "match" << std::endl;
+    // }else{
+    //     std::cout << "geen match" << std::endl;
+    // }
+    
+    
+    std::cout << "dit is begin state: " << beginState << std::endl;
+    printAutomaat(Aut);
+    FindEpsilon(beginState);
+
+
 
 }
