@@ -129,7 +129,6 @@ Automaat parse::Concat(Automaat een, Automaat twee){
         result.push_back({een.back()[3], '$', twee.front()[0], 0});
     } else{
         result.push_back({een.back()[2], '$', twee.front()[0], 0}); 
-
     }
 
     for (const auto& transition : twee){
@@ -283,101 +282,94 @@ bool contains(const std::vector<int>& vec, int value) {
 
 void parse::FindEpsilon(int path){ // zoekt epsilon-closure
     
-    // if(path != 0){
-    //     if(!contains(passed, path)){
-    //         passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
-    //         for(const auto automaat : Aut){
-    //             if(automaat[0] == path && automaat[1] == '$'){
-    //                 if(path == Aut.back()[0]){
-    //                     onthoudE.push_back(path);
-    //                 }
-    //                 FindEpsilon(int(automaat[2]));
-    //                 if(automaat[3] != '0'){
-    //                     FindEpsilon(int(automaat[3]));
-    //                 }
-    //             }else if(automaat[0] == path){
-    //                 onthoudE.push_back(path);
-    //             }
-    //         }
-    //     }
-    // }
-
-    for(const auto automaat : Aut){
-        if(automaat[0] == path && automaat[1] == '$'){
-                if()
-        }
+    if(path != 0){
+        // if(!contains(passed, path)){
+            // passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
+            for(const auto automaat : Aut){
+                if(automaat[0] == path && automaat[1] == '$' && automaat[2] != 0){
+                    if(path == Aut.back()[0]){
+                        onthoudE.push_back(path);
+                    }
+                    FindEpsilon(int(automaat[2]));
+                    if(automaat[3] != '0'){
+                        FindEpsilon(int(automaat[3]));
+                    }
+                }else if(automaat[0] == path){
+                    onthoudE.push_back(path);
+                }
+            }
+        // }
     }
-
 
 }
 
 int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matchende symbol is
 
-    // for(const auto automaat : Aut){
-    //     if(automaat[0] == path && automaat[1] == symbol){ 
-    //         return automaat[2];
-    //     }
-    // }
-    
-
-
-    return 0;
-}
-
-void bubbleSort(std::vector<int>& arr) {
-    int n = arr.size();
-    for (int i = 0; i < n - 1; ++i) {
-        for (int j = 0; j < n - i - 1; ++j) {
-            if (arr[j] > arr[j + 1]) {
-                int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
-            }
+    for(const auto automaat : Aut){
+        if(automaat[0] == path && automaat[1] == symbol){ 
+            return automaat[2];
         }
     }
+    
+    return 0;
 }
 
 void parse::callMatch(std::string match){
     
-    // std::vector<int> onthoudS;
-    // for(const auto automaat : Aut){
-    //     if(automaat[0] == beginState && automaat[1] == '$'){
-    //         passed.clear();
-    //         FindEpsilon(beginState); // als automaton begint met een lambda
-    //     }else{
-    //         onthoudS.push_back(beginState); // als automaton begint met een character
+    std::vector<int> onthoudS;
+    onthoudE.clear();
+    onthoudS.clear();
+    
+    for(const auto automaat : Aut){
+        if(automaat[0] == beginState && automaat[1] == '$'){
+            FindEpsilon(beginState); // als automaton begint met een lambda
+        }else if(automaat[0] == beginState){
+            onthoudS.push_back(beginState); // als automaton begint met een character
+        }
+    }
 
-    //     }
-    // }
+    for(int i : onthoudE){
+        std::cout << i << 'E';
+    }
+    std::cout << std::endl;
 
-    // for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
-    //     for(const int i : onthoudE){
-    //         int a = findSymbol(i, match[index]);
-    //         if(a != 0 ){
-    //             onthoudS.push_back(a);
-    //         }
-    //     }
-    //     onthoudE.clear();
-    //     for(const int j : onthoudS){
-    //         passed.clear();
-    //         FindEpsilon(j);
-    //     }
-    //     onthoudS.clear();
+    for(int i : onthoudS){
+        std::cout << i << 'S';
+    }
+    std::cout << std::endl;
+
+    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
+
+        if(!onthoudE.empty()){
+            for(const int i : onthoudE){
+                int a = findSymbol(i, match[index]);
+                if(a != 0 ){
+                    onthoudS.push_back(a);
+                }
+            }
+        }
+        onthoudE.clear();
+
+        if(!onthoudS.empty()){
+            for(const int j : onthoudS){
+                FindEpsilon(j);
+            }
+        }
+        onthoudS.clear();
+    }
+
+    std::cout << "klaar" << std::endl;
+    // for(int i : onthoudE){
+    //     std::cout << i << ' ';
     // }
+    // std::cout << std::endl;
 
     // bubbleSort(onthoudE);
 
-    // if(onthoudE.back() == Aut.back()[0]){
-    //     std::cout << "match" << std::endl;
-    // }else{
-    //     std::cout << "geen match" << std::endl;
-    // }
-    
-    
-    std::cout << "dit is begin state: " << beginState << std::endl;
-    printAutomaat(Aut);
-    FindEpsilon(beginState);
-
-
-
+    std::cout << onthoudE.back() << std::endl;
+    if(onthoudE.back() == Aut.back()[0]){
+        std::cout << "match" << std::endl;
+    }else{
+        std::cout << "geen match" << std::endl;
+    }
 }
