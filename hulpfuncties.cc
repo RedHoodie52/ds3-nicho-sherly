@@ -324,22 +324,17 @@ void parse::callMatch(std::string match){
         if(automaat[0] == beginState && automaat[1] == '$'){
             FindEpsilon(beginState); // als automaton begint met een lambda
         }else if(automaat[0] == beginState){
-            onthoudS.push_back(beginState); // als automaton begint met een character
+            onthoudE.push_back(beginState); // als automaton begint met een character
         }
     }
-
+    
     for(int i : onthoudE){
         std::cout << i << 'E';
     }
     std::cout << std::endl;
 
-    for(int i : onthoudS){
-        std::cout << i << 'S';
-    }
-    std::cout << std::endl;
-
     for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
-
+        std::cout << match[index] << std::endl;
         if(!onthoudE.empty()){
             for(const int i : onthoudE){
                 int a = findSymbol(i, match[index]);
@@ -348,6 +343,12 @@ void parse::callMatch(std::string match){
                 }
             }
         }
+
+        for(int i : onthoudE){
+            std::cout << i << 'E';
+        }
+        std::cout << std::endl;
+
         onthoudE.clear();
 
         if(!onthoudS.empty()){
@@ -355,6 +356,12 @@ void parse::callMatch(std::string match){
                 FindEpsilon(j);
             }
         }
+
+        for(int i : onthoudS){
+            std::cout << i << 'S';
+        }
+        std::cout << std::endl;
+        
         onthoudS.clear();
     }
 
