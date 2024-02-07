@@ -280,9 +280,10 @@ bool contains(const std::vector<int>& vec, int value) {
     return false;
 }
 
-void parse::FindEpsilon(int path){ // zoekt epsilon-closure
+void parse::FindEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-closure
     
-    if(path != 0){
+    if(path != 0 && !contains(bezocht, path)){
+        bezocht.push_back(path);
         // if(!contains(passed, path)){
             // passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
             for(const auto automaat : Aut){
@@ -290,9 +291,9 @@ void parse::FindEpsilon(int path){ // zoekt epsilon-closure
                     if(path == Aut.back()[0]){
                         onthoudE.push_back(path);
                     }
-                    FindEpsilon(int(automaat[2]));
+                    FindEpsilon(int(automaat[2]), bezocht);
                     if(automaat[3] != '0'){
-                        FindEpsilon(int(automaat[3]));
+                        FindEpsilon(int(automaat[3]), bezocht);
                     }
                 }else if(automaat[0] == path){
                     onthoudE.push_back(path);
@@ -316,13 +317,13 @@ int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matche
 
 void parse::callMatch(std::string match){
     
-    std::vector<int> onthoudS;
+    std::vector<int> onthoudS, bezocht;
     onthoudE.clear();
     onthoudS.clear();
     
     for(const auto automaat : Aut){
         if(automaat[0] == beginState && automaat[1] == '$'){
-            FindEpsilon(beginState); // als automaton begint met een lambda
+            FindEpsilon(beginState, bezocht); // als automaton begint met een lambda
         }else if(automaat[0] == beginState){
             onthoudE.push_back(beginState); // als automaton begint met een character
         }
@@ -353,7 +354,8 @@ void parse::callMatch(std::string match){
 
         if(!onthoudS.empty()){
             for(const int j : onthoudS){
-                FindEpsilon(j);
+                bezocht.clear();
+                FindEpsilon(j, bezocht);
             }
         }
 
