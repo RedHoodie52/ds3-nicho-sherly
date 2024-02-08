@@ -25,7 +25,8 @@ From State      Symbol  To State 1      To State 2
 11              $               5               9
 12              $               0               0
 
-hiervan is de dot notatie ook gegeven:
+Hiervan is de dot notatie ook gegeven,
+zie het toegevoegde bestand.
 
 Daarnaast hebben wij het matchen geimplementeerd, de 3 belangrijkste functies zijn de findsymbol en findepsilon.
 Met findepsilon doen wij de epsilon closure, en met findsymbol zoeken wij verder naar het symbol.

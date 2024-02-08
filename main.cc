@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
         
         if (keuze.substr(0, 4) == "exp ") {
             std::string formule = keuze.substr(4);
-            exp.CallExpr(formule);
+            exp.callExpr(formule);
 
         } else if (keuze.substr(0, 4) == "dot ") {
             std::string uitvoer = keuze.substr(4);

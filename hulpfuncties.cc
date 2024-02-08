@@ -9,7 +9,7 @@ bool isLetter(char letter){
     return false;
 }
 
-void parse::CallExpr(std::string formule){
+void parse::callExpr(const std::string formule){
     state = 1;
     Aut.clear();
     expressie = formule;
@@ -18,7 +18,7 @@ void parse::CallExpr(std::string formule){
     huidigeLetter = expressie[huidigpos];
     beginState = 1;
     Aut = Expr();
-    printAutomaat(Aut);
+
 }
 
 // hulp functie voor wisselen van vectors
@@ -39,21 +39,7 @@ void sortAutomaat(Automaat& automaat) {
     }
 }
 
-// print de automaat
-void parse::printAutomaat(Automaat& automaat) const {
-    sortAutomaat(automaat);
-    automaat.push_back({state, '$', 0, 0});
 
-    std::cout << "From State\tSymbol\tTo State 1\tTo State 2" << std::endl;
-    for (const auto& transition : automaat) {
-        std::cout << transition[0] << "\t\t";
-        char character = static_cast<char>(transition[1]);  
-        std::cout << character << "\t\t";
-        std::cout << transition[2] << "\t\t"
-                  << transition[3] << std::endl;
-    }
-    std::cout << std::endl;
-}
 
 Automaat parse::Union(Automaat een, Automaat twee){
     state++;
@@ -61,7 +47,6 @@ Automaat parse::Union(Automaat een, Automaat twee){
     state++;
     int acceptState = state; // nieuwe uitgangspunt
     beginState = startState; // ingangspunt opslaan voor matchen
-    std::cout << "Union - dit is begin state: " << beginState << std::endl;
 
     Automaat result = een;
     for (const auto& transition : twee) {
@@ -109,7 +94,6 @@ Automaat parse::Concat(Automaat een, Automaat twee){
     Automaat temp;
 
     beginState = een.front()[0]; // ingangspunt oplsaan voor matchen
-    std::cout << "Concat - dit is begin state: " << beginState << std::endl;
 
     // verbind uitgang "een" met ingang "twee"
     if(een.back()[3] != 0){
@@ -152,7 +136,6 @@ Automaat parse::Star(Automaat een){
     int acceptState = state; // nieuwe uitgangspunt
 
     beginState = startState; // ingangspunt oplsaan voor matchen
-    std::cout << "Star - dit is begin state: " << beginState << std::endl;
     
     // uitgang "een" verbinden met ingang "een"
     result.push_back({een.back()[2], '$', een.front()[0], acceptState});
@@ -264,7 +247,7 @@ bool contains(const std::vector<int>& vec, int value) {
     return false;
 }
 
-void parse::FindEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-closure
+void parse::findEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-closure
     
     if(path != 0 && !contains(bezocht, path)){
         bezocht.push_back(path);
@@ -273,9 +256,9 @@ void parse::FindEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-c
                 if(path == Aut.back()[0]){
                     onthoudE.push_back(path);
                 }
-                FindEpsilon(int(automaat[2]), bezocht);
+                findEpsilon(int(automaat[2]), bezocht);
                 if(automaat[3] != '0'){
-                    FindEpsilon(int(automaat[3]), bezocht);
+                    findEpsilon(int(automaat[3]), bezocht);
                 }
             }else if(automaat[0] == path){
                 onthoudE.push_back(path);
@@ -294,19 +277,20 @@ int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matche
 }
 
 void parse::callMatch(std::string match){
-    std::vector<int> onthoudS, bezocht;
+    std::vector<int> onthoudS; //onthouden van symbols
+    std::vector<int> bezocht;
     onthoudE.clear();
     onthoudS.clear();
     
     for(const auto& automaat : Aut){
         if(automaat[0] == beginState && automaat[1] == '$'){
-            FindEpsilon(beginState, bezocht); // als automaton begint met een lambda
+            findEpsilon(beginState, bezocht); // als automaton begint met een lambda
         }else if(automaat[0] == beginState){
             onthoudE.push_back(beginState); // als automaton begint met een character
         }
     }
 
-    if(match != "$"){
+    if(match != "$"){ 
         for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
             if(!onthoudE.empty()){
                 for(const int i : onthoudE){
@@ -322,7 +306,7 @@ void parse::callMatch(std::string match){
             if(!onthoudS.empty()){
                 for(const int j : onthoudS){
                     bezocht.clear();
-                    FindEpsilon(j, bezocht);
+                    findEpsilon(j, bezocht);
                 }
             }
 

@@ -16,16 +16,17 @@ class parse{
         Automaat Term(); // .
         Automaat Fact(); // *
 
-        void CallExpr(std::string formule);
+        void callExpr(std::string formule);
+        
         Automaat Concat(Automaat, Automaat);
         Automaat Star(Automaat);
         Automaat Union(Automaat, Automaat);
-        void printAutomaat(Automaat& automaat) const;
+
         void printDOT(const std::string& uitvoerNaam);
         void printHelpDOT(Automaat, std::ofstream&);
 
         void callMatch(std::string match);
-        void FindEpsilon(int path, std::vector<int>& bezocht);
+        void findEpsilon(int path, std::vector<int>& bezocht);
         int findSymbol(int path, char symbol);
         
 
@@ -36,8 +37,8 @@ class parse{
         int lengteExpressie, huidigpos, state, beginState;
         Automaat Aut;
         std::vector<std::pair<char, int[2]>> Automaton;
-        std::vector<int> onthoudE, passed;
-        char currentSymbol;
+        std::vector<int> onthoudE; // onthouden van epsilon
+
 
 
 
