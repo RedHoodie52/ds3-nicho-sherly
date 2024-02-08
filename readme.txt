@@ -3,16 +3,6 @@ Namen: Sherly Sutrisno, s3660621 & Nicholas Wu, s3692949
 Met behulp van de sudo code hebben we reguliere expressies omgezet in eindige autmaten.
 Hierbij hebben we 3 functies geimplementeerd: "Concat", "Star" en "Union".
 
-
-Niks aan toe te voegen alles werkt perfect!
-
-
-
-Welke representatie is er gekozen 
-waarom is die representatie gekozen
-voorbeeld expressie:
-resulterende automaat:
-
 Om de automaat te representeren hebben we gebruik gemaakt van een std::vector<std::vector<int>>;
 Hiermee kunnen we de transitties in een tabel doen waar je makkelijk bij kunt komen met vector operaties. 
 De 4 kolommen zijn respectievelijk voor de "from-state", "symbol", "to-state-1" en "to-state-2".
@@ -36,3 +26,6 @@ From State      Symbol  To State 1      To State 2
 12              $               0               0
 
 hiervan is de dot notatie ook gegeven:
+
+Daarnaast hebben wij het matchen geimplementeerd, de 3 belangrijkste functies zijn de findsymbol en findepsilon.
+Met findepsilon doen wij de epsilon closure, en met findsymbol zoeken wij verder naar het symbol.

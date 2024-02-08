@@ -282,7 +282,6 @@ void parse::FindEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-c
             }
         }
     }
-
 }
 
 int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matchende symbol is
@@ -307,29 +306,31 @@ void parse::callMatch(std::string match){
         }
     }
 
-    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
-        if(!onthoudE.empty()){
-            for(const int i : onthoudE){
-                int a = findSymbol(i, match[index]);
-                if(a != 0 ){
-                    onthoudS.push_back(a);
+    if(match != "$"){
+        for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
+            if(!onthoudE.empty()){
+                for(const int i : onthoudE){
+                    int a = findSymbol(i, match[index]);
+                    if(a != 0 ){
+                        onthoudS.push_back(a);
+                    }
                 }
             }
-        }
 
-        onthoudE.clear();
+            onthoudE.clear();
 
-        if(!onthoudS.empty()){
-            for(const int j : onthoudS){
-                bezocht.clear();
-                FindEpsilon(j, bezocht);
+            if(!onthoudS.empty()){
+                for(const int j : onthoudS){
+                    bezocht.clear();
+                    FindEpsilon(j, bezocht);
+                }
             }
-        }
 
-        onthoudS.clear();
+            onthoudS.clear();
+        }
     }
 
-    if(onthoudE.back() == Aut.back()[0]){
+    if(onthoudE.back() == Aut.back()[0] || (match == "$" && onthoudE.back() == 0)){
         std::cout << "match" << std::endl;
     }else{
         std::cout << "geen match" << std::endl;

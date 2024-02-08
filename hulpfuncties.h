@@ -25,7 +25,6 @@ class parse{
         void printHelpDOT(Automaat, std::ofstream&);
 
         void callMatch(std::string match);
-        bool findSymbolMatch(char a, int state);
         void FindEpsilon(int path, std::vector<int>& bezocht);
         int findSymbol(int path, char symbol);
         
