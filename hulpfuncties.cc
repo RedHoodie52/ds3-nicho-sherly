@@ -17,8 +17,12 @@ void parse::CallExpr(std::string formule){
     huidigpos = 0;
     huidigeLetter = expressie[huidigpos];
     beginState = 1;
+
+    
     Aut = Expr();
+
     printAutomaat(Aut);
+
 }
 
 // hulp functie voor wisselen van vectors
@@ -55,6 +59,8 @@ void parse::printAutomaat(Automaat& automaat) const {
                   << transition[3] << std::endl;
     }
     std::cout << std::endl;
+
+
 }
 
 Automaat parse::Union(Automaat een, Automaat twee){
@@ -236,6 +242,8 @@ void parse::printDOT(const std::string& uitvoerNaam){
         std::cerr << "Er is geen esxpressie" << std::endl;
 
     }
+
+
 }
 
 void parse::printHelpDOT(Automaat transitions, std::ofstream& dotFile){
@@ -276,38 +284,44 @@ void parse::FindEpsilon(int path, std::vector<int>& bezocht){ // zoekt epsilon-c
     
     if(path != 0 && !contains(bezocht, path)){
         bezocht.push_back(path);
-        for(const auto& automaat : Aut){
-            if(automaat[0] == path && automaat[1] == '$' && automaat[2] != 0){
-                if(path == Aut.back()[0]){
+        // if(!contains(passed, path)){
+            // passed.push_back(path); // als het is langs geweest, voorkomt oneindige loops
+            for(const auto automaat : Aut){
+                if(automaat[0] == path && automaat[1] == '$' && automaat[2] != 0){
+                    if(path == Aut.back()[0]){
+                        onthoudE.push_back(path);
+                    }
+                    FindEpsilon(int(automaat[2]), bezocht);
+                    if(automaat[3] != '0'){
+                        FindEpsilon(int(automaat[3]), bezocht);
+                    }
+                }else if(automaat[0] == path){
                     onthoudE.push_back(path);
                 }
-                FindEpsilon(int(automaat[2]), bezocht);
-                if(automaat[3] != '0'){
-                    FindEpsilon(int(automaat[3]), bezocht);
-                }
-            }else if(automaat[0] == path){
-                onthoudE.push_back(path);
             }
-        }
+        // }
     }
+
 }
 
 int parse::findSymbol(int path, char symbol){ // zoekt of er een pad naar matchende symbol is
-    for(const auto& automaat : Aut){
+
+    for(const auto automaat : Aut){
         if(automaat[0] == path && automaat[1] == symbol){ 
             return automaat[2];
         }
     }
-
+    
     return 0;
 }
 
 void parse::callMatch(std::string match){
+    
     std::vector<int> onthoudS, bezocht;
     onthoudE.clear();
     onthoudS.clear();
     
-    for(const auto& automaat : Aut){
+    for(const auto automaat : Aut){
         if(automaat[0] == beginState && automaat[1] == '$'){
             FindEpsilon(beginState, bezocht); // als automaton begint met een lambda
         }else if(automaat[0] == beginState){
@@ -315,7 +329,13 @@ void parse::callMatch(std::string match){
         }
     }
     
-    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closure, daarna matchende symbol
+    for(int i : onthoudE){
+        std::cout << i << 'E';
+    }
+    std::cout << std::endl;
+
+    for(int index = 0; index < int(match.length()); index++){ // gaat eerst lambda closer, daarna matchende symbol
+        std::cout << match[index] << std::endl;
         if(!onthoudE.empty()){
             for(const int i : onthoudE){
                 int a = findSymbol(i, match[index]);
@@ -325,15 +345,37 @@ void parse::callMatch(std::string match){
             }
         }
 
+        for(int i : onthoudE){
+            std::cout << i << 'E';
+        }
+        std::cout << std::endl;
+
+        onthoudE.clear();
+
         if(!onthoudS.empty()){
             for(const int j : onthoudS){
                 bezocht.clear();
                 FindEpsilon(j, bezocht);
             }
         }
+
+        for(int i : onthoudS){
+            std::cout << i << 'S';
+        }
+        std::cout << std::endl;
+        
         onthoudS.clear();
     }
 
+    std::cout << "klaar" << std::endl;
+    // for(int i : onthoudE){
+    //     std::cout << i << ' ';
+    // }
+    // std::cout << std::endl;
+
+    // bubbleSort(onthoudE);
+
+    std::cout << onthoudE.back() << std::endl;
     if(onthoudE.back() == Aut.back()[0]){
         std::cout << "match" << std::endl;
     }else{
